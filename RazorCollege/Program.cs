@@ -28,7 +28,7 @@ namespace RazorCollege
                 try
                 {
                     var context = services.GetRequiredService<SchoolContext>();
-                    context.Database.EnsureCreated();
+                    //context.Database.EnsureCreated(); // removed after convert to using migrations
                     DbInitializer.Initialize(context); // requires the DbInitializer static class with static Initialize method
                 }
                 catch (Exception ex)
