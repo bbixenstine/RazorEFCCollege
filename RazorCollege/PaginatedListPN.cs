@@ -25,6 +25,8 @@ namespace RazorCollege
             var count = await source.CountAsync();
             var items = await source.Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize).ToListAsync();
+            System.Console.WriteLine("in PaginatedListPN CreateAsync, to return new PaginatedListPN for students {0} to {1} of {2}",
+                pageSize*(pageIndex - 1) + 1, pageSize*(pageIndex) > count ? count : pageSize*(pageIndex), count);
             return new PaginatedListPN<T>(items, count, pageIndex, pageSize);
         }
     }
