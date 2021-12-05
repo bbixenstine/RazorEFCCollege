@@ -1,0 +1,188 @@
+@page
+@using Models
+@model RazorCollege.Pages.Students.IndexModel
+
+@{
+    ViewData["Title"] = "Students"; // changed from "Index"
+    string sortPSortOnly =  String.IsNullOrEmpty(Model.CurSort) ? "?sortOrder=LastName" : "?sortOrder=" + Model.CurSort;
+    string sortP = sortPSortOnly + "&pageIndex=" + Model.DisplayedPageNo;
+    sortP = String.IsNullOrEmpty(Model.CurrentFilter) ? sortP : sortP + "&currentFilter=" + Model.CurrentFilter;
+    int startVal = PagnStatic.PageSize*(Model.DisplayedPageNo - 1) + 1;
+    int count = String.IsNullOrEmpty(Model.CurrentFilter) ? Model.StudentCount : Model.StudentIQCount;
+    int endVal = PagnStatic.PageSize*(Model.DisplayedPageNo) > count ? count : PagnStatic.PageSize*(Model.DisplayedPageNo);
+    string descripn = startVal == endVal ? "Student " + endVal + " of " + endVal : "Students " + startVal + " to " + endVal + " of " + count; 
+}
+<h2>@descripn </h2>
+<h5>@Model.CurrentSortDescription</h5>
+<h5> URL = @Request.Path@sortP</h5>
+<h5>currentFilter = @Model.CurrentFilter</h5>
+<h5>sortP = @sortP</h5> <!-- changed from  <h1>Index</h1>-->
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<!-- TO GET A model field RECOGNIZED, MUST ADD IT TO THE HREF ADDRESS-->
+@{string addressC = "/Students/Create"; 
+    //string sortPart = String.IsNullOrEmpty(Model.CurSort) ? "" : "?sortOrder=" + Model.CurSort;
+    //addressC = addressC + sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    addressC = addressC + sortP;
+}
+<a href=@addressC>
+    <input type="button" value="CreateSort">
+</a>
+<!--Section to create input of filter on first or last name  -->
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by string in first or last name (case insensetive):
+            <input type="text" name="searchString" value="@Model.CurrentFilter" />
+            <!-- use hidden input to transmit existing model value back into get or put method-->
+            <input type="hidden" name="sortOrder" value="@Model.CurSort" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            @{string filterStr = Model.CurrentFilter;
+            string hasFilter = String.IsNullOrEmpty(filterStr) ? "" : filterStr;
+            }
+            @if (hasFilter != "")
+            {
+                <a asp-page="./Index">Back to full List</a>
+                <!-- TO GET A model field RECOGNIZED, MUST ADD IT TO THE HREF ADDRESS-->
+                string addressER = "/Students" + sortPSortOnly;
+                <a href=@addressER>
+                <input type="button" value="Back with Sort">
+            </a>
+            }
+        </p>
+    </div>
+</form>
+
+<!-- changed from using Student for List to Students, within Index.cshtml.cs -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <!--Html.DisplayNameFor(model => model.Students[0].ID)-->
+                <!-- return both the IDSort value and the Current Filter value when clicked-->
+                <a asp-page="./Index" asp-route-sortOrder="@Model.IDSort"
+                asp-route-searchString="@Model.CurrentFilter">
+                    @Html.DisplayNameFor(model => model.Students[0].ID)
+                </a>
+            </th>
+            <th>
+                <!--Html.DisplayNameFor(model => model.Student[0].LastName)-->
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort"
+                asp-route-searchString="@Model.CurrentFilter">
+                    @Html.DisplayNameFor(model => model.Students[0].LastName)
+                </a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Students[0].FirstMidName)
+            </th>
+            <th>
+                <!--Html.DisplayNameFor(model => model.Student[0].EnrollmentDate)-->
+                <a asp-page="./Index" asp-route-sortOrder="@Model.DateSort"
+                asp-route-searchString="@Model.CurrentFilter">
+                    @Html.DisplayNameFor(model => model.Students[0].EnrollmentDate)
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+<!-- foreach (var item in Model.Student) { change the List name from Student to Students-->
+    @foreach (var item in Model.Students) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstMidName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EnrollmentDate)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
+                <!-- TO GET A model field RECOGNIZED, MUST ADD IT TO THE HREF ADDRESS-->
+    @{string addressE = "/Students/Edit/" + item.ID; 
+    //string sortPart = String.IsNullOrEmpty(Model.CurSort) ? "" : "?sortOrder=" + Model.CurSort;
+    //addressE = addressE + sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    addressE = addressE + sortP;
+    string addressD = "/Students/Details/" + item.ID;
+    //addressD = addressD + sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    addressD = addressD + sortP;
+    string addressDel = "/Students/Delete/" + item.ID;
+    //addressDel = addressDel + sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    addressDel = addressDel + sortP;
+    }
+    <h5></h5>
+    <a href=@addressE>
+        <input type="button" value="EditSort">
+    </a>
+                <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |
+    <a href=@addressD>
+        <input type="button" value="DetailsSort">
+    </a>
+                <a asp-page="./Delete" asp-route-id="@item.ID">Delete</a>
+    <a href=@addressDel>
+        <input type="button" value="DeleteSort">
+    </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<!-- Post element to reset PgSize, and BindProperty, based on choice from Model.pgSizeOptions -->
+<form method="post">
+    Page Size = @PagnStatic.PageSize: ReSet Page Size:
+    <select asp-for="PgSize" asp-items="Model.pgSizeOptions">
+        <option value="">Pick one</option>
+    </select>
+    <input type="hidden" name="currentFilter" value="@Model.CurrentFilter" />
+    <input type="hidden" name="sortOrder" value="@Model.CurSort" />
+    <!--<button type="submit" asp-page-handler="update">update</button>-->
+    <input type="submit" asp-page-handler="Update" value="update" />
+</form>
+
+@{
+    var prevDisabled = !Model.Students.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Students.HasNextPage ? "disabled" : "";
+    Nullable<int> i = Model.Students.PageIndex;
+    var pgNo = i ?? 1;
+    var maxDisabled = Model.Students.TotalPages == 1 ? "disabled" : Model.Students.TotalPages == pgNo ? "disabled" : "";
+    
+    int totPages = Model.Students.TotalPages;
+}
+<!-- MUST USE currentFilter so that the pagination is reset when a search term is first entered, but not afterward -->
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurSort"
+   asp-route-pageIndex="1"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-primary @prevDisabled">
+    1
+</a>
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurSort"
+   asp-route-pageIndex="@(Model.Students.PageIndex - 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<div class="btn btn-primary">
+    @pgNo
+</div>
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurSort"
+   asp-route-pageIndex="@(Model.Students.PageIndex + 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurSort"
+   asp-route-pageIndex="@(Model.Students.TotalPages)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-primary @maxDisabled">
+    @totPages
+</a>

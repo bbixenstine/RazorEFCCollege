@@ -1,0 +1,94 @@
+@page "{id:int?}"
+@model RazorCollege.Pages.Students.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+    string sortP =  String.IsNullOrEmpty(Model.SortParam) ? "?sortOrder=LastName" : "?sortOrder=" + Model.SortParam;
+    sortP = sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    sortP = String.IsNullOrEmpty(Model.CurrentFilter) ? sortP : sortP + "&currentFilter=" + Model.CurrentFilter;
+}
+
+<h1>Details</h1>
+<h5>URL = @Request.Path@sortP</h5>
+<h5>currentFilter = @Model.CurrentFilter</h5>
+<h5>sortP = @sortP</h5>
+
+<div>
+    <h4>Student with ID = @Model.Student.ID</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Student.ID)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Student.ID)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Student.LastName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Student.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Student.FirstMidName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Student.FirstMidName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Student.EnrollmentDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Student.EnrollmentDate)
+        </dd>
+    </dl>
+    <!-- added to display enrollment model's course and grade properties-->
+    <dt class="col-sm-2">
+            Class @Html.DisplayNameFor(model => model.Student.Enrollments): Count = @Model.Student.Enrollments.Count
+    </dt>
+    <dd class="col-sm-10">
+        <table class="table">
+            <tr>
+                <th>Course Title</th>
+                <th>Grade</th>
+            </tr>
+            @foreach (var item in Model.Student.Enrollments.OrderBy(i => i.Course.CourseYear).ThenBy(j => j.Course.CourseSemester))
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Course.CourseYear)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Course.CourseSemester)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Course.CourseNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Course.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Grade)
+                    </td>
+                </tr>
+            }
+        </table>
+    </dd>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Student.ID">Edit</a> |
+    @{string addressE = "/Students/Edit/" + Model.Student.ID; 
+    addressE = addressE + sortP;
+    }
+    <a href=@addressE>
+        <input type="button" value="EditSort">
+    </a>
+    <a asp-page="./Index">Back to List</a>
+    <!-- TO GET A model field RECOGNIZED, MUST ADD IT TO THE HREF ADDRESS-->
+    @{
+    string addressER = "/Students" + sortP;
+    }
+    <a href=@addressER>
+        <input type="button" value="Back with Sort">
+    </a>
+</div>

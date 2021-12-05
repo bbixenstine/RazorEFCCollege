@@ -1,0 +1,61 @@
+@page "{id:int}"
+@model RazorCollege.Pages.Students.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+    string sortP =  String.IsNullOrEmpty(Model.SortParam) ? "?sortOrder=LastName" : "?sortOrder=" + Model.SortParam;
+    sortP = sortP + "&pageIndex=" + Model.DisplayedPageNo;
+    <!-- must return currentFilter, not searchString, so that filter is preserved without changing the page -->
+    sortP = String.IsNullOrEmpty(Model.CurrentFilter) ? sortP : sortP + "&currentFilter=" + Model.CurrentFilter;
+}
+
+<h1>Edit</h1>
+<h5>URL = @Request.Path@sortP</h5>
+<h5>searchString = @Model.CurrentFilter</h5>
+<h5>sortP = @sortP</h5>
+
+<h4>Student</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Student.ID" />
+            <input type="hidden" name="currentFilter" value="@Model.CurrentFilter" />
+            <input type="hidden" name="sortOrder" value="@Model.SortParam" />
+            <input type="hidden" name="pageIndex" value="@Model.DisplayedPageNo" />
+            <div class="form-group">
+                <label asp-for="Student.LastName" class="control-label"></label>
+                <input asp-for="Student.LastName" class="form-control" />
+                <span asp-validation-for="Student.LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Student.FirstMidName" class="control-label"></label>
+                <input asp-for="Student.FirstMidName" class="form-control" />
+                <span asp-validation-for="Student.FirstMidName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Student.EnrollmentDate" class="control-label"></label>
+                <input asp-for="Student.EnrollmentDate" class="form-control" />
+                <span asp-validation-for="Student.EnrollmentDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+<!-- TO GET A model field RECOGNIZED, MUST ADD IT TO THE HREF ADDRESS-->
+    @{
+    string addressER = "/Students" + sortP;
+    }
+    <a href=@addressER>
+        <input type="button" value="Back with Sort">
+    </a>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
